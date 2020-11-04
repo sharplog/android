@@ -76,6 +76,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -325,7 +326,6 @@ public class FileDetailSharingFragment extends Fragment implements ShareeListAda
         MenuItem allowDeletingItem = menu.findItem(R.id.allow_deleting);
         MenuItem expirationDateItem = menu.findItem(R.id.action_expiration_date);
         MenuItem reshareItem = menu.findItem(R.id.allow_resharing);
-        MenuItem sendNoteItem = menu.findItem(R.id.action_share_send_note);
 
         allowEditingItem.setChecked(canEdit(share));
 
@@ -349,8 +349,6 @@ public class FileDetailSharingFragment extends Fragment implements ShareeListAda
         SharingMenuHelper.setupExpirationDateMenuItem(menu.findItem(R.id.action_expiration_date),
                                                       share.getExpirationDate(),
                                                       getResources());
-
-        sendNoteItem.setVisible(capabilities.getVersion().isNoteOnShareSupported());
     }
 
     public void showLinkOverflowMenu(OCShare publicShare, ImageView overflowMenuShareLink) {
@@ -398,8 +396,7 @@ public class FileDetailSharingFragment extends Fragment implements ShareeListAda
         Resources res = requireContext().getResources();
         SharingMenuHelper.setupHideFileDownload(menu.findItem(R.id.action_hide_file_download),
                                                 publicShare.isHideFileDownload(),
-                                                isFileDrop(publicShare),
-                                                capabilities);
+                                                isFileDrop(publicShare));
 
         SharingMenuHelper.setupPasswordMenuItem(menu.findItem(R.id.action_password),
                                                 publicShare.isPasswordProtected());
@@ -407,8 +404,6 @@ public class FileDetailSharingFragment extends Fragment implements ShareeListAda
         SharingMenuHelper.setupExpirationDateMenuItem(menu.findItem(R.id.action_share_expiration_date),
                                                       publicShare.getExpirationDate(),
                                                       res);
-
-        menu.findItem(R.id.action_share_send_note).setVisible(capabilities.getVersion().isNoteOnShareSupported());
     }
 
     @VisibleForTesting
@@ -712,5 +707,11 @@ public class FileDetailSharingFragment extends Fragment implements ShareeListAda
 
     private boolean canReshare(OCShare share) {
         return (share.getPermissions() & SHARE_PERMISSION_FLAG) > 0;
+    }
+
+    @VisibleForTesting
+    public void search(String query) {
+        SearchView searchView = getView().findViewById(R.id.searchView);
+        searchView.setQuery(query, true);
     }
 }

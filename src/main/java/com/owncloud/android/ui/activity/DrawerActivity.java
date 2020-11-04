@@ -303,7 +303,7 @@ public abstract class DrawerActivity extends ToolbarActivity
         OCCapability capability = storageManager.getCapability(user.getAccountName());
 
         DrawerMenuUtil.filterSearchMenuItems(menu, user, getResources());
-        DrawerMenuUtil.filterTrashbinMenuItem(menu, user, capability);
+        DrawerMenuUtil.filterTrashbinMenuItem(menu, capability);
         DrawerMenuUtil.filterActivityMenuItem(menu, capability);
 
         DrawerMenuUtil.setupHomeMenuItem(menu, getResources());
@@ -330,7 +330,7 @@ public abstract class DrawerActivity extends ToolbarActivity
 
         switch (menuItem.getItemId()) {
             case R.id.nav_all_files:
-                if ((this instanceof FileDisplayActivity) &&
+                if (this instanceof FileDisplayActivity &&
                     !(((FileDisplayActivity) this).getLeftFragment() instanceof PhotoFragment) &&
                     !(((FileDisplayActivity) this).getLeftFragment() instanceof PreviewTextStringFragment)) {
                     showFiles(false);

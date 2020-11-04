@@ -59,7 +59,7 @@ services:
     environment:
       EVAL: true
     commands:
-      - BRANCH='stable18' /usr/local/bin/initnc.sh
+      - BRANCH='stable20' /usr/local/bin/initnc.sh
       - echo 127.0.0.1 server >> /etc/hosts
       - su www-data -c "OC_PASS=user1 php /var/www/html/occ user:add --password-from-env --display-name='User One' user1"
       - su www-data -c "OC_PASS=user2 php /var/www/html/occ user:add --password-from-env --display-name='User Two' user2"
@@ -68,9 +68,9 @@ services:
       - su www-data -c "php /var/www/html/occ group:add users"
       - su www-data -c "php /var/www/html/occ group:adduser users user1"
       - su www-data -c "php /var/www/html/occ group:adduser users user2"
-      - su www-data -c "git clone -b stable18 https://github.com/nextcloud/activity.git /var/www/html/apps/activity/"
+      - su www-data -c "git clone -b stable20 https://github.com/nextcloud/activity.git /var/www/html/apps/activity/"
       - su www-data -c "php /var/www/html/occ app:enable activity"
-      - su www-data -c "git clone -b stable18 https://github.com/nextcloud/text.git /var/www/html/apps/text/"
+      - su www-data -c "git clone -b stable20 https://github.com/nextcloud/text.git /var/www/html/apps/text/"
       - su www-data -c "php /var/www/html/occ app:enable text"
       - su www-data -c "php /var/www/html/occ app:enable end_to_end_encryption"
       - /usr/local/bin/run.sh
@@ -324,37 +324,4 @@ trigger:
     - master
   event:
     - push
-    - pull_request
----
-kind: pipeline
-type: docker
-name: qa
-
-steps:
-  - name: qa
-    image: nextcloudci/android:android-49
-    privileged: true
-    environment:
-      LOG_USERNAME:
-        from_secret: LOG_USERNAME
-      LOG_PASSWORD:
-        from_secret: LOG_PASSWORD
-      GIT_USERNAME:
-        from_secret: GIT_USERNAME
-      GIT_TOKEN:
-        from_secret: GIT_TOKEN
-      KS_PASS:
-        from_secret: KS_PASS
-      KEY_PASS:
-        from_secret: KEY_PASS
-    commands:
-      - scripts/checkIfRunDrone.sh $GIT_USERNAME $GIT_TOKEN $DRONE_PULL_REQUEST || exit 0
-      - sed -i "/qa/,/\}/ s/versionCode .*/versionCode $DRONE_BUILD_NUMBER/" build.gradle
-      - sed -i "/qa/,/\}/ s/versionName .*/versionName \"$DRONE_BUILD_NUMBER\"/" build.gradle
-      - ./gradlew assembleQaDebug
-      - $(find /opt/android-sdk-linux/build-tools/*/apksigner | sort | tail -n1) sign  --ks-pass pass:$KS_PASS --key-pass pass:$KEY_PASS --ks-key-alias key0 --ks scripts/QA_keystore.jks build/outputs/apk/qa/debug/qa-debug-*.apk
-      - scripts/uploadArtifact.sh $LOG_USERNAME $LOG_PASSWORD $DRONE_BUILD_NUMBER $DRONE_PULL_REQUEST $GIT_USERNAME $GIT_TOKEN
-
-trigger:
-  event:
     - pull_request
